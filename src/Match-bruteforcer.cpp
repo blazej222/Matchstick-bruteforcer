@@ -29,15 +29,29 @@ zabierasz z drugiej ustawiasz w drugiej
  Zabierasz jedno z pierwszej i ustawiasz znak na plus
 */
 #include <iostream>
+#include <string>
 using namespace std;
 
-class BadNumberException : public std::exception {
+class BadNumberException : public std::exception 
+{
 public:
     const char* what() {
         return "Exception1";
     }
 };
 
+class CustomString : public string
+{
+    public:
+    void removeSpaces()
+    {
+        for(int i = 0;i<this->length();i++){
+            size_t stringpos = this->find(" ");
+            if(stringpos == string::npos) return;
+            this->erase(stringpos,1);
+        }
+    }
+};
 
 class Equation {
 public:
@@ -186,17 +200,23 @@ public:
         if (takeOneAndAdd(num2, num1)) return true; //second with first
         //takeOneAndAdd(num1, num2);
     }
+    bool convertFromInput(CustomString str){
+        // TODO: write this method
+    }
 };
 
 int main()
 {
+
     Equation a;
-        //a.numberToDigit(6, a.num1);
-        //cout << a.digitToNumber(a.num1) << endl;
-    a.numberToDigit(6, a.num1);
-    a.numberToDigit(7, a.num2);
-    a.numberToDigit(9, a.solution);
+    /*
+    CustomString input;
+    cin >> input;
+    input.removeSpaces();
+    */
+    a.numberToDigit(7, a.num1);
+    a.numberToDigit(5, a.num2);
+    a.numberToDigit(7, a.solution);
     a.solve();
-    //a.takeOneAndAdd(a.num1, a.num2);
 
 }
