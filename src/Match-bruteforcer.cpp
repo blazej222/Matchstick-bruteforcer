@@ -89,7 +89,7 @@ public:
         }
     }
 
-    void numberToDigit(int num, bool result[]) {
+    void numberToDigit(int num, bool result[]) { //converts number from input to array of matches sign
         int tmp = 0;
         switch (num) {
         case 1:
@@ -136,14 +136,14 @@ public:
     bool solveEquation(int num11,int num22) {
         int sol = digitToNumber(solution); // convert it to number
         if (sign) { //if we have addition
-            if (num11 + num22 == sol) {
+            if (num11 + num22 == sol) { // 1+2=sol
                 cout << num11 << " + " << num22 << " = " << sol << endl; //print end result
                 return true;
             }
         }
         else {
-            if (num1 - num2 == sol) return true;
-            else if (num2 - num1 == sol) return true;
+            if (num1 - num2 == sol) return true; //1-2 = sol
+            else if (num2 - num1 == sol) return true; // 2-1 = sol
         }
         return false;
     }
@@ -166,7 +166,7 @@ public:
                         //at this point we should have two valid values - lets solve it!
                         bool solres = solveEquation(digitToNumber(num11), digitToNumber(num22));
                         if (solres) {
-                            cout << i << " => " << j << endl;
+                            cout << i << " => " << j << endl; //prints which was taken and added
                             return true;
                         }
                         num22[j] = false;
