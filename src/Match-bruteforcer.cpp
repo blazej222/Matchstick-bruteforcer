@@ -56,9 +56,20 @@ class CustomString : public string
 class Equation {
 public:
     enum modifier{
-        NUM1,
-        NUM2,
-        SOLUTION
+        NUM1PLUS,
+        NUM2PLUS,
+        NUM1MINUS,
+        NUM2MINUS,
+        SOLUTIONPLUS,
+        SOLUTIONMINUS,
+        NUM1TO2,
+        NUM2TO1,
+        NUM1TOSOL,
+        NUM2TOSOL,
+        NUM1TO1,
+        NUM2TO2,
+        SOLTONUM1,
+        SOLTONUM2
     };
 
     bool num1[7] = { 0,0,0,0,0,0,0 }; // states representing digit as in sevseg display
@@ -153,8 +164,8 @@ public:
         }
     }
 
-    bool solveEquation(int num11,int num22,bool solutionn[]) {
-        int sol = digitToNumber(solutionn); // convert it to number
+    bool solveEquation(int num11,int num22,int sol) {
+        //int sol = digitToNumber(solutionn); // convert it to number
         if (sign) { //if we have addition
             if (num11 + num22 == sol) { // 1+2=sol
                 cout << num11 << " + " << num22 << " = " << sol << endl; //print end result
@@ -168,7 +179,57 @@ public:
         return false;
     }
 
-    bool takeOneAndAdd(bool num11[], bool num22[]) {
+    void printMessage(modifier mod){
+        switch(mod){
+            case NUM1TO2:
+                cout << "Changed first number with the second number" <<endl;
+                break;
+            case NUM2TO1:
+                cout << "Changed second number with the first number" <<endl;
+                break;
+            case NUM1TOSOL:
+                cout <<"Changed first number with the solution" << endl;
+                break;
+            case NUM2TOSOL:
+                cout <<"Changed second number with the solution" << endl;
+                break;
+            case SOLTONUM1:
+                cout << "Changed solution with the first number" <<endl;
+                break;
+            case SOLTONUM2:
+                cout << "Changed solution with the second number" <<endl;
+                break;
+            case NUM1TO1:
+                cout <<"Changed first number with the first number" << endl;
+                break;
+            case NUM2TO2:
+                cout <<"Changed second number with the second number" << endl;
+                break;
+            case NUM1PLUS:
+                cout << "Changed first number with the operation sign" <<endl;
+                break;
+            case NUM2PLUS:
+                cout << "Changed second number with the operation sign" <<endl;
+                break;
+            case SOLUTIONPLUS:
+                cout <<"Changed solution with the operation sign" << endl;
+                break;
+            case NUM1MINUS:
+                cout << "Changed first number with the operation sign" <<endl;
+                break;
+            case NUM2MINUS:
+                cout << "Changed second number with the operation sign" <<endl;
+                break;
+            case SOLUTIONMINUS:
+                cout <<"Changed solution with the operation sign" << endl;
+                break;
+            default:
+                cout << "Unexpected" <<endl;
+                break;
+        }
+    }
+
+    bool takeOneAndAdd(bool num11[], bool num22[],modifier mod) {
         for (int i = 0; i < 7; i++) {
             if (num11[i]) { //find any segment that is set
                 num11[i] = false; // take it
@@ -184,8 +245,13 @@ public:
                             continue; // continue with the loop
                         } 
                         //at this point we should have two valid values - lets solve it!
-                        bool solres = solveEquation(digitToNumber(num11), digitToNumber(num22));
+
+                        bool solres = false;
+                        if(mod == NUM1TO2 || mod ==NUM2TO1)solres = solveEquation(digitToNumber(num11), digitToNumber(num22), digitToNumber(solution));
+                        if(mod == NUM1TOSOL) solres = solveEquation(digitToNumber(num1),digitToNumber(num22),digitToNumber(num11)); // means we're swapping num1 for solution, so num1 +- (changed)num2 = (changed)solution
+                        else if(mod == NUM2TOSOL) solres = solveEquation(digitToNumber(num11),digitToNumber(num2),digitToNumber(num22)); //we're swapping num2 for a solution
                         if (solres) {
+                            printMessage(mod);
                             cout << i << " => " << j << endl; //prints which was taken and added
                             return true;
                         }
@@ -213,9 +279,11 @@ public:
                 sign = true; //change equation sign
                 //at this point we should have two valid numbers - lets solve it!
                 bool solres = false;
-                if(mod == NUM1) solres = solveEquation(digitToNumber(num11), digitToNumber(num2));
-                else if (mod == NUM2) solres = solveEquation(digitToNumber(num1),digitToNumber(num11));
+                if(mod == NUM1PLUS) solres = solveEquation(digitToNumber(num11), digitToNumber(num2),digitToNumber(solution));
+                else if (mod == NUM2PLUS) solres = solveEquation(digitToNumber(num1),digitToNumber(num11),digitToNumber(solution));
+                else if(mod == SOLUTIONPLUS) solres = solveEquation(digitToNumber(num1),digitToNumber(num2),digitToNumber(num11));
                 if (solres) {
+                    printMessage(mod);
                     cout << i << " => " << "+" << endl; //prints which was taken and added
                     return true;
                 }
@@ -229,25 +297,55 @@ public:
 
     }
 
+    bool changeSignToMinusAndAddOne(bool num22[], modifier mod){
+        if(!sign) return false;
+        for (int j = 0; j < 7; j++) { 
+            if (!num22[j]) { //find any segment in second that is not set
+                num22[j] = true; // set it
+                if (digitToNumber(num22) == -1) { //check if second number created is incorrect
+                    num22[j] = false; // return preview value
+                    continue; // continue with the loop
+                } 
+                //at this point we should have two valid values - lets solve it!
+                bool solres = true;
+                if(mod == NUM1MINUS) solres = solveEquation(digitToNumber(num22), digitToNumber(num2),digitToNumber(solution));
+                else if (mod == NUM2MINUS) solres = solveEquation(digitToNumber(num1),digitToNumber(num22),digitToNumber(solution));
+                else if(mod == SOLUTIONMINUS) solres = solveEquation(digitToNumber(num1),digitToNumber(num2),digitToNumber(num22));
+                if (solres) {
+                    printMessage(mod);
+                    cout << j << " => " << "+" << endl; //prints which was taken and added
+                    return true;
+                }
+                num22[j] = false;
+                continue;
+            }
+            // if the first number was correct but it didnt make a proper equation with second
+            num22[j] = false; 
+        }         
+        //cout << "ok" << endl;
+        return false; //we've tried all combinations and none made sense       
+    }
+ 
+
     bool solve() {
-        if (takeOneAndAdd(num1, num2)) return true; //first with second
-        if (takeOneAndAdd(num2, num1)) return true; //second with first
-        if (takeOneAndAdd(num1,solution)) return true; //firt with solution
-        if (takeOneAndAdd(num2,solution)) return true; // second with solution
-        if (takeOneAndAdd(solution,num1)) return true; //solution with first
-        if (takeOneAndAdd(solution,num2)) return true;
-        if(takeOneAndAdd(num1,num1)) return true;
-        if(takeOneAndAdd(num2,num2)) return true;
+        if (takeOneAndAdd(num1, num2,NUM1TO2)) return true; //first with second
+        if (takeOneAndAdd(num2, num1,NUM2TO1)) return true; //second with first
+        if (takeOneAndAdd(num1,solution,NUM1TOSOL)) return true; //firt with solution
+        if (takeOneAndAdd(num2,solution,NUM2TOSOL)) return true; // second with solution
+        if (takeOneAndAdd(solution,num1,SOLTONUM1)) return true; //solution with first
+        if (takeOneAndAdd(solution,num2,SOLTONUM2)) return true;
+        if(takeOneAndAdd(num1,num1,NUM1TO1)) return true;
+        if(takeOneAndAdd(num2,num2,NUM2TO2)) return true;
         //----------------------------------
-        if(takeOneAndChangeSignToPlus(num1,num2)) return true;
-        if(takeOneAndChangeSignToPlus(num2,num1)) return true;
-        if(takeOneAndChangeSignToPlus(num1,num1)) return true;
-        if(takeOneAndChangeSignToPlus(num2,num2)) return true;
-        if(takeOneAndChangeSignToPlus(num1,solution)) return true;
-        if(takeOneAndChangeSignToPlus(num2,solution)) return true;
-        if(takeOneAndChangeSignToPlus(solution,num2)) return true;
-        if(takeOneAndChangeSignToPlus(solution,num1)) return true;
+        if(takeOneAndChangeSignToPlus(num1,NUM1PLUS)) return true;
+        if(takeOneAndChangeSignToPlus(num2,NUM2PLUS)) return true;
+        if(takeOneAndChangeSignToPlus(solution,SOLUTIONPLUS)) return true;
+        //----------------------------------
+        if(changeSignToMinusAndAddOne(num1,NUM1MINUS)) return true;
+        if(takeOneAndChangeSignToPlus(num2,NUM2PLUS)) return true;
+        if(takeOneAndChangeSignToPlus(solution,SOLUTIONMINUS)) return true;
         //takeOneAndAdd(num1, num2);
+        return false;
     }
     bool convertFromInput(CustomString str){
         // TODO: write this method
