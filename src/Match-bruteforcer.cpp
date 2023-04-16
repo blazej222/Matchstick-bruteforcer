@@ -69,7 +69,8 @@ public:
         NUM1TO1,
         NUM2TO2,
         SOLTONUM1,
-        SOLTONUM2
+        SOLTONUM2,
+        SOLTOSOL
     };
 
     bool num1[7] = { 0,0,0,0,0,0,0 }; // states representing digit as in sevseg display
@@ -330,6 +331,46 @@ public:
         //cout << "ok" << endl;
         return false; //we've tried all combinations and none made sense       
     }
+
+    bool takeOneAndAddTheSame(bool num11[],modifier mod){
+         for (int i = 0; i < 7; i++) {
+            if (num11[i]) { //find any segment that is set
+                num11[i] = false; // take it
+                /*
+                if (digitToNumber(num11) == -1) { // if number created is incorrect
+                    num11[i] = true; //return previous value
+                    continue; //continue the loop in other iteration
+                }
+                */
+                for (int j = 0; j < 7; j++) { 
+                    if (!num11[j]) { //find any segment in second that is not set
+                        num11[j] = true; // set it
+                        if (digitToNumber(num11) == -1) { //check if second number created is incorrect
+                            num11[j] = false; // return preview value
+                            continue; // continue with the loop
+                        } 
+                        //at this point we should have two valid values - lets solve it!
+
+                        bool solres = false;
+                        if(mod == NUM1TO1) solres = solveEquation(digitToNumber(num11),digitToNumber(num2),digitToNumber(solution));
+                        else if(mod == NUM2TO2) solres = solveEquation(digitToNumber(num1),digitToNumber(num11),digitToNumber(solution));
+                        else if(mod == SOLTOSOL) solres = solveEquation(digitToNumber(num1),digitToNumber(num2),digitToNumber(num11));
+                        if (solres) {
+                            printMessage(mod);
+                            cout << i << " => " << j << endl; //prints which was taken and added
+                            return true;
+                        }
+                        num11[j] = false; //if not solved then set back 
+                        continue;
+                    } 
+                }
+                // if the first number was correct but it didnt make a proper equation with second
+                num11[i] = true; // return previous state
+            }
+            //cout << "ok" << endl;
+        }
+        return false; //we've tried all combinations and none made sense
+    }
  
 
     bool solve() {
@@ -339,8 +380,9 @@ public:
         if (takeOneAndAdd(num2,solution,NUM2TOSOL)) return true; // second with solution
         if (takeOneAndAdd(solution,num1,SOLTONUM1)) return true; //solution with first
         if (takeOneAndAdd(solution,num2,SOLTONUM2)) return true;
-        if(takeOneAndAdd(num1,num1,NUM1TO1)) return true;
-        if(takeOneAndAdd(num2,num2,NUM2TO2)) return true;
+        if(takeOneAndAddTheSame(num1,NUM1TO1)) return true;
+        if(takeOneAndAddTheSame(num2,NUM2TO2)) return true;
+        if(takeOneAndAddTheSame(solution,SOLTOSOL)) return true;
         //----------------------------------
         if(takeOneAndChangeSignToPlus(num1,NUM1PLUS)) return true;
         if(takeOneAndChangeSignToPlus(num2,NUM2PLUS)) return true;
@@ -366,10 +408,10 @@ int main()
     cin >> input;
     input.removeSpaces();
     */
-    a.numberToDigit(5, a.num1);
-    a.numberToDigit(5, a.num2);
-    a.numberToDigit(8, a.solution);
-    a.sign = false;
+    a.numberToDigit(2, a.num1);
+    a.numberToDigit(3, a.num2);
+    a.numberToDigit(4, a.solution);
+    //a.sign = false;
     // 5 + 5 = 8 => 5+3=8
     a.solve();
 }
