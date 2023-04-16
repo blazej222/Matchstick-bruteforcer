@@ -10,8 +10,8 @@
 //1111101 - 0
 
 /*
-Zabierasz z pierwszej ustawiasz w drugiej - pierwsza ∈ {6,7,8,9} 6->5, 7->1, 8->0_6_9, 9->5	druga ∈ {3,5,6,9,0} 3->9, 5->9, 6->8, 9->8
-zabierasz z drugiej ustawiasz w pierwszej pierwsza ∈ {3,5,6,9,0} 3->9, 5->9, 6->8, 9->8	druga ∈ {6,7,8,9} 6->5, 7->1, 8->0_6_9, 9->5
+Zabierasz z pierwszej ustawiasz w drugiej - pierwsza ∈ {6,7,8,9} 6->5, 7->1, 8->0_6_9, 9->5	druga ∈ {1,3,4,5,6,9,0} 3->9, 4->9 5->9, 6->8, 9->8 1->7
+zabierasz z drugiej ustawiasz w pierwszej pierwsza ∈ {1,3,5,6,9,0} 3->9, 5->9, 6->8, 9->8 1->7	druga ∈ {6,7,8,9} 6->5, 7->1, 8->0_6_9, 9->5
 Pierwsze dwa to jedna funckja tylko se odwracasz argumenty
 
 zabierasz z pierwszej ustawiasz znak pierwsza ∈ {6,7,8,9} 6->5, 7->1, 8->0_6_9, 9->5
@@ -55,6 +55,12 @@ class CustomString : public string
 
 class Equation {
 public:
+    enum modifier{
+        NUM1,
+        NUM2,
+        SOLUTION
+    };
+
     bool num1[7] = { 0,0,0,0,0,0,0 }; // states representing digit as in sevseg display
     bool num2[7] = { 0,0,0,0,0,0,0 };
     bool solution[7] = { 0,0,0,0,0,0,0 };
@@ -147,8 +153,8 @@ public:
         }
     }
 
-    bool solveEquation(int num11,int num22) {
-        int sol = digitToNumber(solution); // convert it to number
+    bool solveEquation(int num11,int num22,bool solutionn[]) {
+        int sol = digitToNumber(solutionn); // convert it to number
         if (sign) { //if we have addition
             if (num11 + num22 == sol) { // 1+2=sol
                 cout << num11 << " + " << num22 << " = " << sol << endl; //print end result
@@ -157,7 +163,7 @@ public:
         }
         else {
             if (num1 - num2 == sol) return true; //1-2 = sol
-            else if (num2 - num1 == sol) return true; // 2-1 = sol
+            //else if (num2 - num1 == sol) return true; // 2-1 = sol
         }
         return false;
     }
@@ -195,9 +201,52 @@ public:
         return false; //we've tried all combinations and none made sense
     }
 
+        bool takeOneAndChangeSignToPlus(bool num11[], modifier mod) {
+        if(sign) return false;
+        for (int i = 0; i < 7; i++) {
+            if (num11[i]) { //find any segment that is set
+                num11[i] = false; // take it
+                if (digitToNumber(num11) == -1) { // if number created is incorrect
+                    num11[i] = true; //return previous value
+                    continue; //continue the loop in other iteration
+                }
+                sign = true; //change equation sign
+                //at this point we should have two valid numbers - lets solve it!
+                bool solres = false;
+                if(mod == NUM1) solres = solveEquation(digitToNumber(num11), digitToNumber(num2));
+                else if (mod == NUM2) solres = solveEquation(digitToNumber(num1),digitToNumber(num11));
+                if (solres) {
+                    cout << i << " => " << "+" << endl; //prints which was taken and added
+                    return true;
+                }
+                // if the first number was correct but it didnt make a proper equation with changed sign
+                num11[i] = true; // return previous state
+                sign = false; //return previous sign
+                continue;
+            } 
+        }
+        return false; //we've tried all combinations and none made sense
+
+    }
+
     bool solve() {
         if (takeOneAndAdd(num1, num2)) return true; //first with second
         if (takeOneAndAdd(num2, num1)) return true; //second with first
+        if (takeOneAndAdd(num1,solution)) return true; //firt with solution
+        if (takeOneAndAdd(num2,solution)) return true; // second with solution
+        if (takeOneAndAdd(solution,num1)) return true; //solution with first
+        if (takeOneAndAdd(solution,num2)) return true;
+        if(takeOneAndAdd(num1,num1)) return true;
+        if(takeOneAndAdd(num2,num2)) return true;
+        //----------------------------------
+        if(takeOneAndChangeSignToPlus(num1,num2)) return true;
+        if(takeOneAndChangeSignToPlus(num2,num1)) return true;
+        if(takeOneAndChangeSignToPlus(num1,num1)) return true;
+        if(takeOneAndChangeSignToPlus(num2,num2)) return true;
+        if(takeOneAndChangeSignToPlus(num1,solution)) return true;
+        if(takeOneAndChangeSignToPlus(num2,solution)) return true;
+        if(takeOneAndChangeSignToPlus(solution,num2)) return true;
+        if(takeOneAndChangeSignToPlus(solution,num1)) return true;
         //takeOneAndAdd(num1, num2);
     }
     bool convertFromInput(CustomString str){
@@ -214,9 +263,9 @@ int main()
     cin >> input;
     input.removeSpaces();
     */
-    a.numberToDigit(7, a.num1);
-    a.numberToDigit(5, a.num2);
-    a.numberToDigit(7, a.solution);
+    a.numberToDigit(1, a.num1);
+    a.numberToDigit(4, a.num2);
+    a.numberToDigit(6, a.solution);
+    a.sign = false;
     a.solve();
-
 }
