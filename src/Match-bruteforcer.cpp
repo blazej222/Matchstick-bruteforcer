@@ -248,14 +248,16 @@ public:
 
                         bool solres = false;
                         if(mod == NUM1TO2 || mod ==NUM2TO1)solres = solveEquation(digitToNumber(num11), digitToNumber(num22), digitToNumber(solution));
-                        if(mod == NUM1TOSOL) solres = solveEquation(digitToNumber(num1),digitToNumber(num22),digitToNumber(num11)); // means we're swapping num1 for solution, so num1 +- (changed)num2 = (changed)solution
+                        else if(mod == NUM1TOSOL) solres = solveEquation(digitToNumber(num1),digitToNumber(num22),digitToNumber(num11)); // means we're swapping num1 for solution, so num1 +- (changed)num2 = (changed)solution
                         else if(mod == NUM2TOSOL) solres = solveEquation(digitToNumber(num11),digitToNumber(num2),digitToNumber(num22)); //we're swapping num2 for a solution
+                        else if(mod == NUM1TO1) solres = solveEquation(digitToNumber(num22),digitToNumber(num2),digitToNumber(solution));
+                        else if(mod == NUM2TO2) solres = solveEquation(digitToNumber(num1),digitToNumber(num22),digitToNumber(solution));
                         if (solres) {
                             printMessage(mod);
                             cout << i << " => " << j << endl; //prints which was taken and added
                             return true;
                         }
-                        num22[j] = false;
+                        num22[j] = false; //if not solved then set back 
                         continue;
                     } 
                 }
@@ -307,20 +309,23 @@ public:
                     continue; // continue with the loop
                 } 
                 //at this point we should have two valid values - lets solve it!
-                bool solres = true;
+                sign = false;
+                bool solres = false;
                 if(mod == NUM1MINUS) solres = solveEquation(digitToNumber(num22), digitToNumber(num2),digitToNumber(solution));
                 else if (mod == NUM2MINUS) solres = solveEquation(digitToNumber(num1),digitToNumber(num22),digitToNumber(solution));
                 else if(mod == SOLUTIONMINUS) solres = solveEquation(digitToNumber(num1),digitToNumber(num2),digitToNumber(num22));
                 if (solres) {
                     printMessage(mod);
-                    cout << j << " => " << "+" << endl; //prints which was taken and added
+                    cout << j << " => " << "-" << endl; //prints which was taken and added
                     return true;
                 }
                 num22[j] = false;
+                sign = true;
                 continue;
             }
             // if the first number was correct but it didnt make a proper equation with second
-            num22[j] = false; 
+            //num22[j] = false; 
+            sign = true;
         }         
         //cout << "ok" << endl;
         return false; //we've tried all combinations and none made sense       
@@ -342,8 +347,8 @@ public:
         if(takeOneAndChangeSignToPlus(solution,SOLUTIONPLUS)) return true;
         //----------------------------------
         if(changeSignToMinusAndAddOne(num1,NUM1MINUS)) return true;
-        if(takeOneAndChangeSignToPlus(num2,NUM2PLUS)) return true;
-        if(takeOneAndChangeSignToPlus(solution,SOLUTIONMINUS)) return true;
+        if(changeSignToMinusAndAddOne(num2,NUM2PLUS)) return true;
+        if(changeSignToMinusAndAddOne(solution,SOLUTIONMINUS)) return true;
         //takeOneAndAdd(num1, num2);
         return false;
     }
@@ -361,9 +366,10 @@ int main()
     cin >> input;
     input.removeSpaces();
     */
-    a.numberToDigit(1, a.num1);
-    a.numberToDigit(4, a.num2);
-    a.numberToDigit(6, a.solution);
+    a.numberToDigit(5, a.num1);
+    a.numberToDigit(5, a.num2);
+    a.numberToDigit(8, a.solution);
     a.sign = false;
+    // 5 + 5 = 8 => 5+3=8
     a.solve();
 }
