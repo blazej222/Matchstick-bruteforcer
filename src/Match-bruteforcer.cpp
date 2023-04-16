@@ -174,7 +174,10 @@ public:
             }
         }
         else {
-            if (num1 - num2 == sol) return true; //1-2 = sol
+            if (num11 - num22 == sol){
+                cout << num11 << " - " << num22 << " = " << sol << endl; //print end result
+                return true; //1-2 = sol
+            } 
             //else if (num2 - num1 == sol) return true; // 2-1 = sol
         }
         return false;
@@ -408,10 +411,10 @@ int main()
     cin >> input;
     input.removeSpaces();
     */
-    a.numberToDigit(2, a.num1);
-    a.numberToDigit(3, a.num2);
-    a.numberToDigit(4, a.solution);
+    a.numberToDigit(3, a.num1);
+    a.numberToDigit(8, a.num2);
+    a.numberToDigit(6, a.solution);
     //a.sign = false;
-    // 5 + 5 = 8 => 5+3=8
+    // 5+2=4 => 6-2=4
     a.solve();
 }
